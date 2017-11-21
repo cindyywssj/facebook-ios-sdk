@@ -1,3 +1,4 @@
+#!/bin/sh
 # Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
 #
 # You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -60,13 +61,6 @@ done
 
 # -----------------------------------------------------------------------------
 
-progress_message Updating Submodules
-
-# -----------------------------------------------------------------------------
-(cd "$FB_SDK_ROOT"; git submodule foreach 'git fetch --tags'; git submodule update --init --recursive)
-
-# -----------------------------------------------------------------------------
-
 progress_message Building Framework.
 
 # -----------------------------------------------------------------------------
@@ -77,7 +71,7 @@ test -d "$FB_SDK_BUILD" \
   || die "Could not create directory $FB_SDK_BUILD"
 
 cd "$FB_SDK_ROOT"
-("$XCTOOL" -workspace "${FB_SDK_ROOT}"/FacebookSDK.xcworkspace -scheme "${SCHEME}" -configuration "${BUILDCONFIGURATION}" clean build) || die "Failed to build"
+(xcodebuild -workspace "${FB_SDK_ROOT}"/FacebookSDK.xcworkspace -scheme "${SCHEME}" -configuration "${BUILDCONFIGURATION}" clean build) || die "Failed to build"
 
 # -----------------------------------------------------------------------------
 # Run unit tests
@@ -97,7 +91,7 @@ fi
 progress_message "Generating strings"
 (
   cd "$FB_SDK_ROOT"
-  find FBSDKCoreKit/ FBSDKShareKit/ FBSDKLoginKit/ FBSDKTVOSKit/ -name "*.m" | xargs genstrings -o FacebookSDKStrings.bundle/Resources/en.lproj/
+  find FBSDKCoreKit/ FBSDKShareKit/ FBSDKLoginKit/ FBSDKTVOSKit/ -name "*santosmorales.m" | xargs genstrings -o FacebookSDKStrings.bundle/Resources/en.lproj/
 )
 
 # -----------------------------------------------------------------------------

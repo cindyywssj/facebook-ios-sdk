@@ -20,6 +20,7 @@
 
 #import <dlfcn.h>
 
+#import <MobileCoreServices/MobileCoreServices.h>
 #import <Security/Security.h>
 #import <StoreKit/StoreKit.h>
 
@@ -27,7 +28,6 @@
 #import "FBSDKSettings.h"
 
 static NSString *const g_frameworkPathTemplate = @"/System/Library/Frameworks/%@.framework/%@";
-static NSString *const g_sqlitePath = @"/usr/lib/libsqlite3.dylib";
 
 #pragma mark - Library and Symbol Loading
 
@@ -234,6 +234,7 @@ OSStatus fbsdkdfl_SecItemDelete(CFDictionaryRef query)
   return f(query);
 }
 
+<<<<<<< HEAD
 #pragma mark - sqlite3 APIs
 
 // sqlite3 is a dynamic library (not a framework) so its path is constructed differently
@@ -316,17 +317,30 @@ int fbsdkdfl_sqlite3_bind_int(sqlite3_stmt *stmt, int index, int value)
 }
 
 int fbsdkdfl_sqlite3_bind_text(sqlite3_stmt *stmt, int index, const char *value, int n, void(*callback)(void *))
+=======
+#pragma mark - Social Constants
+
+_fbsdkdfl_load_framework_once_impl_(Social)
+_fbsdkdfl_handle_get_impl_(Social)
+
+#define _fbsdkdfl_Social_get_and_return_constant(SYMBOL) _fbsdkdfl_get_and_return_NSString(Social, SYMBOL)
+
+NSString *fbsdkdfl_SLServiceTypeFacebook(void)
+>>>>>>> 5e4c1da17ab4ab353c215602a065daf9693b7f24
 {
-  _fbsdkdfl_sqlite3_get_f(sqlite3_bind_text);
-  return f(stmt, index, value, n, callback);
+  _fbsdkdfl_Social_get_and_return_constant(SLServiceTypeFacebook);
 }
 
+<<<<<<< HEAD
 int fbsdkdfl_sqlite3_step(sqlite3_stmt *stmt)
+=======
+NSString *fbsdkdfl_SLServiceTypeTwitter(void)
+>>>>>>> 5e4c1da17ab4ab353c215602a065daf9693b7f24
 {
-  _fbsdkdfl_sqlite3_get_f(sqlite3_step);
-  return f(stmt);
+  _fbsdkdfl_Social_get_and_return_constant(SLServiceTypeTwitter);
 }
 
+<<<<<<< HEAD
 double fbsdkdfl_sqlite3_column_double(sqlite3_stmt *stmt, int iCol)
 {
   _fbsdkdfl_sqlite3_get_f(sqlite3_column_double);
@@ -340,30 +354,34 @@ int fbsdkdfl_sqlite3_column_int(sqlite3_stmt *stmt, int iCol)
 }
 
 const unsigned char *fbsdkdfl_sqlite3_column_text(sqlite3_stmt *stmt, int iCol)
-{
-  _fbsdkdfl_sqlite3_get_f(sqlite3_column_text);
-  return f(stmt, iCol);
-}
-
-#pragma mark - Social Constants
-
-_fbsdkdfl_load_framework_once_impl_(Social)
-_fbsdkdfl_handle_get_impl_(Social)
-
-#define _fbsdkdfl_Social_get_and_return_constant(SYMBOL) _fbsdkdfl_get_and_return_NSString(Social, SYMBOL)
-
-NSString *fbsdkdfl_SLServiceTypeFacebook(void)
-{
-  _fbsdkdfl_Social_get_and_return_constant(SLServiceTypeFacebook);
-}
-
+=======
 #pragma mark - Social Classes
 
 #define _fbsdkdfl_Social_get_c(SYMBOL) _fbsdkdfl_symbol_get_c(Social, SYMBOL)
 
 Class fbsdkdfl_SLComposeViewControllerClass(void)
+>>>>>>> 5e4c1da17ab4ab353c215602a065daf9693b7f24
 {
   _fbsdkdfl_Social_get_c(SLComposeViewController);
+  return c;
+}
+
+#pragma mark - MessageUI Classes
+
+_fbsdkdfl_load_framework_once_impl_(MessageUI)
+_fbsdkdfl_handle_get_impl_(MessageUI)
+
+#define _fbsdkdfl_MessageUI_get_c(SYMBOL) _fbsdkdfl_symbol_get_c(MessageUI, SYMBOL)
+
+Class fbsdkdfl_MFMailComposeViewControllerClass(void)
+{
+  _fbsdkdfl_MessageUI_get_c(MFMailComposeViewController);
+  return c;
+}
+
+Class fbsdkdfl_MFMessageComposeViewControllerClass(void)
+{
+  _fbsdkdfl_MessageUI_get_c(MFMessageComposeViewController);
   return c;
 }
 
@@ -462,6 +480,12 @@ Class fbsdkdfl_SFSafariViewControllerClass(void)
   return c;
 }
 
+Class fbsdkdfl_SFAuthenticationSessionClass(void)
+{
+  _fbsdkdfl_SafariServices_get_c(SFAuthenticationSession);
+  return c;
+}
+
 #pragma mark - Accounts Constants
 
 _fbsdkdfl_load_framework_once_impl_(Accounts)
@@ -552,4 +576,97 @@ Class fbsdkdfl_CTTelephonyNetworkInfoClass(void)
 {
     _fbsdkdfl_CoreTelephonyLibrary_get_c(CTTelephonyNetworkInfo);
     return c;
+}
+
+#pragma mark - CoreImage
+
+_fbsdkdfl_load_framework_once_impl_(CoreImage)
+_fbsdkdfl_handle_get_impl_(CoreImage)
+
+#define _fbsdkdfl_CoreImage_get_c(SYMBOL) _fbsdkdfl_symbol_get_c(CoreImage, SYMBOL);
+#define _fbsdkdfl_CoreImage_get_and_return_NSString(SYMBOL) _fbsdkdfl_get_and_return_NSString(CoreImage, SYMBOL)
+
+
+Class fbsdkdfl_CIImageClass(void)
+{
+  _fbsdkdfl_CoreImage_get_c(CIImage);
+  return c;
+}
+
+Class fbsdkdfl_CIFilterClass(void)
+{
+  _fbsdkdfl_CoreImage_get_c(CIFilter);
+  return c;
+}
+
+NSString *fbsdkdfl_kCIInputImageKey(void)
+{
+  _fbsdkdfl_CoreImage_get_and_return_NSString(kCIInputImageKey);
+}
+
+NSString *fbsdkdfl_kCIInputRadiusKey(void)
+{
+  _fbsdkdfl_CoreImage_get_and_return_NSString(kCIInputRadiusKey);
+}
+
+NSString *fbsdkdfl_kCIOutputImageKey(void)
+{
+  _fbsdkdfl_CoreImage_get_and_return_NSString(kCIOutputImageKey);
+}
+
+#pragma mark - Photos.framework
+
+_fbsdkdfl_load_framework_once_impl_(Photos)
+_fbsdkdfl_handle_get_impl_(Photos)
+
+#define _fbsdkdfl_Photos_get_c(SYMBOL) _fbsdkdfl_symbol_get_c(Photos, SYMBOL);
+#define _fbsdkdfl_Photos_get_and_return_NSString(SYMBOL) _fbsdkdfl_get_and_return_NSString(Photos, SYMBOL)
+
+Class fbsdkdfl_PHPhotoLibrary(void)
+{
+  _fbsdkdfl_Photos_get_c(PHPhotoLibrary);
+  return c;
+}
+
+Class fbsdkdfl_PHAssetChangeRequest(void)
+{
+  _fbsdkdfl_Photos_get_c(PHAssetChangeRequest);
+  return c;
+}
+
+#pragma mark - MobileCoreServices
+
+_fbsdkdfl_load_framework_once_impl_(MobileCoreServices)
+_fbsdkdfl_handle_get_impl_(MobileCoreServices)
+
+#define _fbsdkdfl_MobileCoreServices_get_k(SYMBOL) _fbsdkdfl_symbol_get_k(MobileCoreServices, SYMBOL, CFStringRef *)
+
+#define _fbsdkdfl_MobileCoreServices_get_and_return_k(SYMBOL) \
+_fbsdkdfl_MobileCoreServices_get_k(SYMBOL); \
+_fbsdkdfl_return_k(MobileCoreServices, SYMBOL)
+
+#define _fbsdkdfl_MobileCoreServices_get_f(SYMBOL) _fbsdkdfl_symbol_get_f(MobileCoreServices, SYMBOL)
+
+typedef CFStringRef (*UTTypeCopyPreferredTagWithClass_type)(CFStringRef inUTI, CFStringRef inTagClass);
+
+CFStringRef fbsdkdfl_UTTypeCopyPreferredTagWithClass(CFStringRef inUTI,
+                                                     CFStringRef inTagClass)
+{
+  _fbsdkdfl_MobileCoreServices_get_f(UTTypeCopyPreferredTagWithClass);
+  return f(inUTI, inTagClass);
+}
+
+CFStringRef fbsdkdfl_kUTTagClassMIMEType(void)
+{
+  _fbsdkdfl_MobileCoreServices_get_and_return_k(kUTTagClassMIMEType);
+}
+
+CFStringRef fbsdkdfl_kUTTypeJPEG(void)
+{
+  _fbsdkdfl_MobileCoreServices_get_and_return_k(kUTTypeJPEG);
+}
+
+CFStringRef fbsdkdfl_kUTTypePNG(void)
+{
+  _fbsdkdfl_MobileCoreServices_get_and_return_k(kUTTypePNG);
 }

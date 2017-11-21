@@ -68,11 +68,8 @@ NSString *kFBSDKShareModelTestUtilityOpenGraphStringKey = @"TEST:OPEN_GRAPH_STRI
 + (FBSDKShareLinkContent *)linkContentWithoutQuote
 {
   FBSDKShareLinkContent *linkContent = [[FBSDKShareLinkContent alloc] init];
-  linkContent.contentDescription = [self linkContentDescription];
-  linkContent.contentTitle = [self linkContentTitle];
   linkContent.contentURL = [self contentURL];
   linkContent.hashtag = [self hashtag];
-  linkContent.imageURL = [self linkImageURL];
   linkContent.peopleIDs = [self peopleIDs];
   linkContent.placeID = [self placeID];
   linkContent.ref = [self ref];
@@ -353,13 +350,20 @@ NSString *kFBSDKShareModelTestUtilityOpenGraphStringKey = @"TEST:OPEN_GRAPH_STRI
 
 + (NSArray *)media
 {
-  return @[[self video], [self photoWithImageURL]];
+  return @[[self video], [self photoWithImage]];
 }
 
 + (FBSDKShareMediaContent *)mediaContent
 {
   FBSDKShareMediaContent *content = [FBSDKShareMediaContent new];
   content.media = [self media];
+  return content;
+}
+
++ (FBSDKShareMediaContent *)multiVideoMediaContent
+{
+  FBSDKShareMediaContent *content = [FBSDKShareMediaContent new];
+  content.media = @[[self video], [self video]];
   return content;
 }
 

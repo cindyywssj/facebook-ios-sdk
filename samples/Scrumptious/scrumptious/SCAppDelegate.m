@@ -19,9 +19,7 @@
 #import "SCAppDelegate.h"
 
 #import <FBSDKCoreKit/FBSDKCoreKit.h>
-
 #import <FBSDKLoginKit/FBSDKLoginKit.h>
-
 #import <FBSDKShareKit/FBSDKShareKit.h>
 
 #import "SCSettings.h"
@@ -50,8 +48,19 @@
 
 - (BOOL)application:(UIApplication *)application
             openURL:(NSURL *)url
-  sourceApplication:(NSString *)sourceApplication
-         annotation:(id)annotation {
+            options:(nonnull NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
+{
+    return [[FBSDKApplicationDelegate sharedInstance] application:application
+                                                          openURL:url
+                                                          options:options];
+}
+
+// Still need this for iOS8
+- (BOOL)application:(UIApplication *)application
+            openURL:(NSURL *)url
+  sourceApplication:(nullable NSString *)sourceApplication
+         annotation:(nonnull id)annotation
+{
     return [[FBSDKApplicationDelegate sharedInstance] application:application
                                                           openURL:url
                                                 sourceApplication:sourceApplication
@@ -59,8 +68,6 @@
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
-    [FBSDKAppEvents activateApp];
-
     // Do the following if you use Mobile App Engagement Ads to get the deferred
     // app link after your app is installed.
     [FBSDKAppLinkUtility fetchDeferredAppLink:^(NSURL *url, NSError *error) {

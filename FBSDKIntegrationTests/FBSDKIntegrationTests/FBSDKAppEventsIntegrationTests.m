@@ -22,6 +22,7 @@
 
 #import <FBSDKCoreKit/FBSDKCoreKit.h>
 
+#import <OHHTTPStubs/NSURLRequest+HTTPBodyTesting.h>
 #import <OHHTTPStubs/OHHTTPStubs.h>
 
 #import "FBSDKCoreKit+Internal.h"
@@ -90,9 +91,10 @@
         XCTAssertEqualObjects(@"MOBILE_APP_INSTALL", params[@"event"]);
         [blocker signal];
       } else {
-        NSString *body = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
+        NSString *body = [[NSString alloc] initWithData:request.OHHTTPStubs_HTTPBody encoding:NSUTF8StringEncoding];
         XCTAssertTrue([body rangeOfString:@"fb_mobile_activate_app"].location != NSNotFound);
-        XCTAssertEqual([FBSDKAppEventsUtility unixTimeNow],
+        // Current time should be >= time of the event logged.
+        XCTAssertGreaterThanOrEqual([FBSDKAppEventsUtility unixTimeNow],
                        [[[self class] formDataForRequestBody:body][0][@"_logTime"] longValue]);
         NSSet *activateSessions, *deactivateSessions;
         [[self class] appEventSessionIDsForRequestBody:body activateSessions:&activateSessions deactivateSessions:&deactivateSessions];
@@ -115,33 +117,45 @@
   [self clearUserDefaults];
   [FBSDKAppEventsUtility clearLibraryFiles];
 
-  // call activate and verify publish install is called.
+  // call activate and verify publish install is called. Also verify that a second request was made to send the activate app event.
   [FBSDKAppEvents activateApp];
   XCTAssertTrue([blocker waitWithTimeout:8], @"did not get install ping");
-  // activate would also queue up an activate event but that should not be flushed yet.
-  XCTAssertEqual(1, activiesEndpointCalledCount, @"activities endpoint called more than once, maybe there was a premature flush?");
-
-  // now flush
-  [FBSDKAppEvents flush];
-  XCTAssertTrue([blocker2 waitWithTimeout:8], @"did not get activate flush");
+  XCTAssertTrue([blocker2 waitWithTimeout:8], @"did not get app launch ping");
+  XCTAssertEqual(2, activiesEndpointCalledCount, @"activities endpoint called more than twice - unexpected flush calls?");
 }
 
 // same as below but inject no minimum time for considering new sessions in timespent
 - (void)testDeactivationsMultipleSessions {
   const int duration1 = 2;
   const int duration2 = 3;
-  // default to disabling timer based flushes so that long tests
-  // don't get more flushes than explicitly expecting.
+
+  // Get the original flush behavior
+  FBSDKAppEventsFlushBehavior originalFlushBehavior = [FBSDKAppEvents flushBehavior];
+  // Set flush behavior to explicit so we can exactly control the sequence of events
+  [FBSDKAppEvents setFlushBehavior:FBSDKAppEventsFlushBehaviorExplicitOnly];
   [FBSDKAppEvents singleton].disableTimer = YES;
+  [self clearUserDefaults];
+
+  // Remove min time for considering deactivations
+  id mock = [OCMockObject partialMockForObject:[FBSDKServerConfigurationManager cachedServerConfiguration]];
+  [[[mock stub] andReturnValue:OCMOCK_VALUE(-1.0)] sessionTimoutInterval];
+  id classMock = OCMClassMock([FBSDKServerConfigurationManager class]);
+  OCMStub([classMock cachedServerConfiguration]).andReturn(mock);
+
+
   FBSDKTestBlocker *blocker = [[FBSDKTestBlocker alloc] initWithExpectedSignalCount:1];
   __block NSUInteger activiesEndpointCalledForActivateCount = 0;
   __block NSUInteger activiesEndpointCalledForDeactivateCount = 0;
   [OHHTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
     NSString *const activitiesPath = [NSString stringWithFormat:@"%@/activities", self.testAppID];
     if ([request.URL.path hasSuffix:activitiesPath]) {
-      NSString *body = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
-      activiesEndpointCalledForDeactivateCount = [body countOfSubstring:@"fb_mobile_deactivate_app"];
-      activiesEndpointCalledForActivateCount = [body countOfSubstring:@"fb_mobile_activate_app"];
+      NSDictionary *params = [FBSDKUtility dictionaryWithQueryString:request.URL.query];
+      if ([params[@"event"]  isEqual: @"MOBILE_APP_INSTALL"]) {
+        return NO;
+      }
+      NSString *body = [[NSString alloc] initWithData:request.OHHTTPStubs_HTTPBody encoding:NSUTF8StringEncoding];
+      activiesEndpointCalledForDeactivateCount += [body countOfSubstring:@"fb_mobile_deactivate_app"];
+      activiesEndpointCalledForActivateCount += [body countOfSubstring:@"fb_mobile_activate_app"];
       NSSet *activateSessions, *deactivateSessions;
       [[self class] appEventSessionIDsForRequestBody:body activateSessions:&activateSessions deactivateSessions:&deactivateSessions];
       XCTAssertEqual(3, activateSessions.count);
@@ -176,10 +190,7 @@
   [notificationCenter postNotificationName:UIApplicationWillTerminateNotification object:nil];
   // make sure we remove any time spent persistence.
   [FBSDKAppEventsUtility clearLibraryFiles];
-
-  // remove min time for considering deactivations
-  id mock = [OCMockObject partialMockForObject:[FBSDKServerConfigurationManager cachedServerConfiguration]];
-  [[[mock stub] andReturnValue:OCMOCK_VALUE(-1.0)] sessionTimoutInterval];
+  [FBSDKServerConfigurationManager clearCache];
 
   [FBSDKAppEvents activateApp];
   [notificationCenter postNotificationName:UIApplicationDidBecomeActiveNotification object:nil];
@@ -195,11 +206,15 @@
 
   [FBSDKAppEvents activateApp];
   [notificationCenter postNotificationName:UIApplicationDidBecomeActiveNotification object:nil];
+
   [FBSDKAppEvents flush];
 
-  XCTAssertTrue([blocker waitWithTimeout:30], @"did not get expectedflushes");
+  XCTAssertTrue([blocker waitWithTimeout:10], @"did not get expectedflushes");
   XCTAssertEqual(3, activiesEndpointCalledForActivateCount);
   XCTAssertEqual(2, activiesEndpointCalledForDeactivateCount);
+
+  // Revert back to original flush behavior
+  [FBSDKAppEvents setFlushBehavior:originalFlushBehavior];
 }
 
 - (void)testDeactivationsSingleSession {
@@ -212,7 +227,7 @@
   [OHHTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
     NSString *const activitiesPath = [NSString stringWithFormat:@"%@/activities", self.testAppID];
     if ([request.URL.path hasSuffix:activitiesPath]) {
-      NSString *body = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
+      NSString *body = [[NSString alloc] initWithData:request.OHHTTPStubs_HTTPBody encoding:NSUTF8StringEncoding];
       activiesEndpointCalledForDeactivateCount = [body countOfSubstring:@"fb_mobile_deactivate_app"];
       activiesEndpointCalledForActivateCount = [body countOfSubstring:@"fb_mobile_activate_app"];
       NSSet *activateSessions, *deactivateSessions;
@@ -240,14 +255,15 @@
   [FBSDKAppEvents activateApp];
   [notificationCenter postNotificationName:UIApplicationDidBecomeActiveNotification object:nil];
   [notificationCenter postNotificationName:UIApplicationWillResignActiveNotification object:nil];
+
   [FBSDKAppEvents activateApp];
   [notificationCenter postNotificationName:UIApplicationDidBecomeActiveNotification object:nil];
   [notificationCenter postNotificationName:UIApplicationWillTerminateNotification object:nil];
+
   [FBSDKAppEvents activateApp];
   [notificationCenter postNotificationName:UIApplicationDidBecomeActiveNotification object:nil];
-  [FBSDKAppEvents flush];
 
-  XCTAssertTrue([blocker waitWithTimeout:5], @"did not get expectedflushes");
+  XCTAssertTrue([blocker waitWithTimeout:10], @"did not get expectedflushes");
   XCTAssertEqual(1, activiesEndpointCalledForActivateCount);
   XCTAssertEqual(0, activiesEndpointCalledForDeactivateCount);
 }
@@ -575,6 +591,132 @@
   if (deactivateSessionIDs) {
     *deactivateSessionIDs = [mutableDeactivateSessionIDs copy];
   }
+}
+
+- (void)testUserID {
+  // default to disabling timer based flushes so that long tests
+  // don't get more flushes than explicitly expecting.
+  [FBSDKAppEvents singleton].disableTimer = YES;
+  NSString *appID = self.testAppID;
+  FBSDKTestBlocker *blocker = [[FBSDKTestBlocker alloc] initWithExpectedSignalCount:1];
+  __block int activiesEndpointCalledForUserCount = 0;
+  __block int activiesEndpointCalledWithoutUserCount = 0;
+  NSString *expectedUserID = @"bobbytables";
+  NSString *expectedEventString = [NSString stringWithFormat:@"_app_user_id\":\"%@", expectedUserID];
+
+  [OHHTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+    NSString *const activitiesPath = [NSString stringWithFormat:@"%@/activities", appID];
+    if ([request.URL.path hasSuffix:activitiesPath]) {
+      NSString *body = [[NSString alloc] initWithData:request.OHHTTPStubs_HTTPBody encoding:NSUTF8StringEncoding];
+      if ([body rangeOfString:expectedEventString].location != NSNotFound) {
+        activiesEndpointCalledForUserCount++;
+      } else {
+        activiesEndpointCalledWithoutUserCount++;
+      }
+
+      if (activiesEndpointCalledForUserCount + activiesEndpointCalledWithoutUserCount == 4){
+        [blocker signal];
+      }
+    }
+    // always return NO because we don't actually want to stub a http response, only
+    // to intercept and verify request to fufill the expectation.
+    return NO;
+  } withStubResponse:^OHHTTPStubsResponse *(NSURLRequest *request) {
+    return [OHHTTPStubsResponse responseWithData:[NSData data]
+                                      statusCode:200
+                                         headers:nil];
+  }];
+
+  [FBSDKAppEvents setFlushBehavior:FBSDKAppEventsFlushBehaviorExplicitOnly];
+
+  // perform 4 different flushes, making sure there's no userid
+  // then two flushes with user id, then verify again it is cleared.
+  [FBSDKAppEvents setUserID:nil];
+  [FBSDKAppEvents logEvent:@"testUserID"];
+  [FBSDKAppEvents flush];
+
+  [FBSDKAppEvents setUserID:expectedUserID];
+  [FBSDKAppEvents logEvent:@"testUserID"];
+  [FBSDKAppEvents flush];
+
+  XCTAssertEqualObjects([FBSDKAppEvents userID], expectedUserID);
+  [FBSDKAppEvents logEvent:@"testUserID"];
+  [FBSDKAppEvents flush];
+
+  [FBSDKAppEvents setUserID:nil];
+  [FBSDKAppEvents logEvent:@"testUserID"];
+  [FBSDKAppEvents flush];
+
+  XCTAssertTrue([blocker waitWithTimeout:16], @"did not get 4 flushes");
+  XCTAssertEqual(2,activiesEndpointCalledForUserCount, @"more than 2 log request made with userid");
+  XCTAssertEqual(2,activiesEndpointCalledWithoutUserCount, @"more than 2 log request made without userid");
+
+  // reset flush behavior.
+  [FBSDKAppEvents setFlushBehavior:FBSDKAppEventsFlushBehaviorAuto];
+}
+
+
+- (void)testUserProperties {
+  NSString *appID = self.testAppID;
+  FBSDKTestBlocker *blocker = [[FBSDKTestBlocker alloc] initWithExpectedSignalCount:1];
+  __block int endpointCalledCount = 0;
+
+  [OHHTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+    NSString *const activitiesPath = [NSString stringWithFormat:@"%@/user_properties", appID];
+    if ([request.URL.path hasSuffix:activitiesPath]) {
+      NSString *body = [[NSString alloc] initWithData:request.OHHTTPStubs_HTTPBody encoding:NSUTF8StringEncoding];
+      XCTAssertTrue([body rangeOfString:@"advertiser_id"].location != NSNotFound);
+      XCTAssertTrue([body rangeOfString:@"custom_data"].location != NSNotFound);
+      XCTAssertTrue([body rangeOfString:@"user_unique_id"].location != NSNotFound);
+      XCTAssertTrue([body rangeOfString:@"favorite_color"].location != NSNotFound);
+      endpointCalledCount++;
+    }
+    // always return NO because we don't actually want to stub a http response, only
+    // to intercept and verify request to fufill the expectation.
+    return NO;
+  } withStubResponse:^OHHTTPStubsResponse *(NSURLRequest *request) {
+    return [OHHTTPStubsResponse responseWithData:[NSData data]
+                                      statusCode:200
+                                         headers:nil];
+  }];
+
+  [FBSDKAppEvents setUserID:@"lilbobbytables"];
+  [FBSDKAppEvents updateUserProperties:@{
+                                         @"favorite_color" : @"blue",
+                                         @"created" : [NSDate date].description,
+                                         @"email" : @"someemail@email.com",
+                                         @"some_id" : @"Custom:1",
+                                         @"validated" : @YES,
+                                         }
+                               handler:^(FBSDKGraphRequestConnection *connection, id result, NSError *error) {
+                                 XCTAssertNil(error);
+                                 [blocker signal];
+                               }];
+  XCTAssertTrue([blocker waitWithTimeout:5], @"did not get callback");
+  XCTAssertEqual(1, endpointCalledCount);
+
+  //now make sure there is an error for invalid values like nsdate
+  blocker = [[FBSDKTestBlocker alloc] initWithExpectedSignalCount:1];
+  [FBSDKAppEvents updateUserProperties:@{
+                                         @"created" : [NSDate date]
+                                         }
+                               handler:^(FBSDKGraphRequestConnection *connection, id result, NSError *error) {
+                                 XCTAssertNotNil(error);
+                                 [blocker signal];
+                               }];
+  XCTAssertTrue([blocker waitWithTimeout:5], @"did not get callback for nsdate error");
+
+  //now make sure there is an error
+  blocker = [[FBSDKTestBlocker alloc] initWithExpectedSignalCount:1];
+  [FBSDKAppEvents setUserID:nil];
+  [FBSDKAppEvents updateUserProperties:@{
+                                         @"favorite_color" : @"blue"
+                                         }
+                               handler:^(FBSDKGraphRequestConnection *connection, id result, NSError *error) {
+                                 XCTAssertNotNil(error);
+                                 [blocker signal];
+                               }];
+  XCTAssertTrue([blocker waitWithTimeout:5], @"did not get callback");
 }
 
 @end

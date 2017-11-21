@@ -19,9 +19,7 @@
 #import "RPSAppDelegate.h"
 
 #import <Bolts/Bolts.h>
-
 #import <FBSDKCoreKit/FBSDKCoreKit.h>
-
 #import <FBSDKLoginKit/FBSDKLoginKit.h>
 
 #import "RPSAppLinkedViewController.h"
@@ -61,12 +59,23 @@
 
 - (BOOL)application:(UIApplication *)application
             openURL:(NSURL *)url
-  sourceApplication:(NSString *)sourceApplication
-         annotation:(id)annotation {
+            options:(nonnull NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
+{
+    return [self application:application
+                     openURL:url
+           sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]
+                  annotation:options[UIApplicationOpenURLOptionsAnnotationKey]];
+}
 
+// Still need this for iOS8
+- (BOOL)application:(UIApplication *)application
+            openURL:(NSURL *)url
+  sourceApplication:(nullable NSString *)sourceApplication
+         annotation:(nonnull id)annotation
+{
     BOOL result = [[FBSDKApplicationDelegate sharedInstance] application:application
                                                                  openURL:url
-                                                       sourceApplication:sourceApplication
+                                                                 sourceApplication:sourceApplication
                                                               annotation:annotation];
 
     RPSCall appLinkCall = [RPSAppDelegate callFromAppLinkURL:url sourceApplication:sourceApplication];
@@ -95,11 +104,6 @@
     [[FBSDKApplicationDelegate sharedInstance] application:application
                              didFinishLaunchingWithOptions:launchOptions];
     return YES;
-}
-
-- (void)applicationDidBecomeActive:(UIApplication *)application
-{
-    [FBSDKAppEvents activateApp];
 }
 
 @end

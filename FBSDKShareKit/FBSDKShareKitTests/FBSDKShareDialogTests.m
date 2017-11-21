@@ -156,13 +156,19 @@
 {
   FBSDKShareDialog *dialog = [[FBSDKShareDialog alloc] init];
   dialog.mode = FBSDKShareDialogModeBrowser;
-  NSError *error;
+  __block NSError *error;
   dialog.shareContent = [FBSDKShareModelTestUtility linkContent];
   XCTAssertTrue([dialog validateWithError:&error]);
   XCTAssertNil(error);
   dialog.shareContent = [FBSDKShareModelTestUtility photoContentWithImages];
-  XCTAssertFalse([dialog validateWithError:&error]);
-  XCTAssertNotNil(error);
+  [self _performBlockWithAccessToken:^{
+    XCTAssertTrue([dialog validateWithError:&error]);
+    XCTAssertNil(error);
+  }];
+  [self _performBlockWithNilAccessToken:^{
+    XCTAssertFalse([dialog validateWithError:&error]);
+    XCTAssertNotNil(error);
+  }];
   dialog.shareContent = [FBSDKShareModelTestUtility openGraphContentWithObjectID];
   XCTAssertTrue([dialog validateWithError:&error]);
   XCTAssertNil(error);
@@ -190,13 +196,19 @@
 {
   FBSDKShareDialog *dialog = [[FBSDKShareDialog alloc] init];
   dialog.mode = FBSDKShareDialogModeWeb;
-  NSError *error;
+  __block NSError *error;
   dialog.shareContent = [FBSDKShareModelTestUtility linkContent];
   XCTAssertTrue([dialog validateWithError:&error]);
   XCTAssertNil(error);
   dialog.shareContent = [FBSDKShareModelTestUtility photoContentWithImages];
-  XCTAssertFalse([dialog validateWithError:&error]);
-  XCTAssertNotNil(error);
+  [self _performBlockWithAccessToken:^{
+    XCTAssertTrue([dialog validateWithError:&error]);
+    XCTAssertNil(error);
+  }];
+  [self _performBlockWithNilAccessToken:^{
+    XCTAssertFalse([dialog validateWithError:&error]);
+    XCTAssertNotNil(error);
+  }];
   dialog.shareContent = [FBSDKShareModelTestUtility openGraphContentWithObjectID];
   XCTAssertTrue([dialog validateWithError:&error]);
   XCTAssertNil(error);
@@ -307,6 +319,7 @@ expectedPreJSONtext:@"#hashtag" expectedJSON:nil];
 {
   [self _testValidateShareContent:[FBSDKShareModelTestUtility linkContent]
                       expectValid:NO
+                       expectShow:YES
                              mode:FBSDKShareDialogModeShareSheet
                nonSupportedScheme:@"fbapi20160328:/"];
 }
@@ -315,6 +328,7 @@ expectedPreJSONtext:@"#hashtag" expectedJSON:nil];
 {
   [self _testValidateShareContent:[FBSDKShareModelTestUtility linkContent]
                       expectValid:YES
+                       expectShow:YES
                              mode:FBSDKShareDialogModeShareSheet
                nonSupportedScheme:nil];
 
@@ -324,6 +338,7 @@ expectedPreJSONtext:@"#hashtag" expectedJSON:nil];
 {
   [self _testValidateShareContent:[FBSDKShareModelTestUtility mediaContent]
                       expectValid:NO
+                       expectShow:NO
                              mode:FBSDKShareDialogModeShareSheet
                nonSupportedScheme:@"fbapi20160328:/"];
 }
@@ -332,6 +347,16 @@ expectedPreJSONtext:@"#hashtag" expectedJSON:nil];
 {
   [self _testValidateShareContent:[FBSDKShareModelTestUtility mediaContent]
                       expectValid:YES
+                       expectShow:YES
+                             mode:FBSDKShareDialogModeShareSheet
+               nonSupportedScheme:nil];
+}
+
+- (void)testThatValidateWithErrorReturnsNOForMMPWithMoreThan1Video
+{
+  [self _testValidateShareContent:[FBSDKShareModelTestUtility multiVideoMediaContent]
+                      expectValid:NO
+                       expectShow:NO
                              mode:FBSDKShareDialogModeShareSheet
                nonSupportedScheme:nil];
 }
@@ -340,6 +365,7 @@ expectedPreJSONtext:@"#hashtag" expectedJSON:nil];
 
 - (void)_testValidateShareContent:(id<FBSDKSharingContent>)shareContent
                       expectValid:(BOOL)expectValid
+                       expectShow:(BOOL)expectShow
                              mode:(FBSDKShareDialogMode)mode
                nonSupportedScheme:(NSString *)nonSupportedScheme
 {
@@ -368,7 +394,7 @@ expectedPreJSONtext:@"#hashtag" expectedJSON:nil];
     XCTAssertFalse([dialog validateWithError:&error]);
     XCTAssertNotNil(error);
   }
-  XCTAssert([dialog show]);
+  XCTAssertEqual(expectShow, [dialog show]);
 
   [mockApplication stopMocking];
   [mockInternalUtility stopMocking];
@@ -417,6 +443,29 @@ expectedPreJSONtext:(NSString *)expectedPreJSONText
   [settingsClassMock stopMocking];
   [mockApplication stopMocking];
   [mockInternalUtility stopMocking];
+}
+
+- (void)_performBlockWithAccessToken:(dispatch_block_t)block
+{
+  FBSDKAccessToken *accessToken = [[FBSDKAccessToken alloc] initWithTokenString:@"FBSDKShareDialogTests" permissions:nil declinedPermissions:nil appID:nil userID:nil expirationDate:nil refreshDate:nil];
+  [self _setCurrentAccessToken:accessToken andPerformBlock:block];
+}
+
+- (void)_performBlockWithNilAccessToken:(dispatch_block_t)block
+{
+  [self _setCurrentAccessToken:nil andPerformBlock:block];
+}
+
+- (void)_setCurrentAccessToken:(FBSDKAccessToken *)accessToken
+               andPerformBlock:(dispatch_block_t)block
+{
+  if (block == NULL) {
+    return;
+  }
+  FBSDKAccessToken *oldToken = [FBSDKAccessToken currentAccessToken];
+  [FBSDKAccessToken setCurrentAccessToken:accessToken];
+  block();
+  [FBSDKAccessToken setCurrentAccessToken:oldToken];
 }
 
 @end

@@ -363,7 +363,7 @@ typedef void (^RPSBlock)(void);
     }
 }
 
-- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
     switch (buttonIndex) {
         case 0: { // Share on Facebook
             FBSDKShareDialog *shareDialog = [[FBSDKShareDialog alloc] init];
@@ -470,7 +470,6 @@ typedef void (^RPSBlock)(void);
 - (FBSDKShareLinkContent *)getGameLinkShareContent {
     FBSDKShareLinkContent *content = [[FBSDKShareLinkContent alloc] init];
     content.contentURL = [NSURL URLWithString:@"https://developers.facebook.com/"];
-    content.contentTitle = @"Rock, Papers, Scissors Sample Application";
     return content;
 }
 

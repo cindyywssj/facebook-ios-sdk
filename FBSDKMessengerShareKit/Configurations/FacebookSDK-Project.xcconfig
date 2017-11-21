@@ -37,7 +37,7 @@ ALWAYS_SEARCH_USER_PATHS = NO
 HEADER_SEARCH_PATHS = $(inherited) "$(BUILT_PRODUCTS_DIR)" "$(DERIVED_FILE_DIR)"
 LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)" $(inherited)
 INFOPLIST_FILE = $(TARGET_NAME)/Info.plist
-MODULEMAP_FILE = $(TARGET_NAME)/module.modulemap
+MODULEMAP_FILE = $(TARGET_NAME)/FBSDKMessengerShareKit.modulemap
 
 // Code Generation
 GCC_DYNAMIC_NO_PIC = NO
@@ -58,6 +58,7 @@ CLANG_CXX_LIBRARY = libc++
 ENABLE_BITCODE = NO
 FB_BITCODE_FLAG = $()
 FB_BITCODE_FLAG[sdk=iphoneos9.*] = -fembed-bitcode
+FB_BITCODE_FLAG[sdk=iphoneos10.*] = -fembed-bitcode
 OTHER_CFLAGS = $(inherited) $(FB_BITCODE_FLAG)
 
 
