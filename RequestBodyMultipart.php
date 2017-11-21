@@ -25,7 +25,7 @@ namespace Facebook\Http;
 
 use Facebook\FileUpload\FacebookFile;
 
-/**
+/**https://facebook.com/arriva.michoacan?tsid=0.7933770411601355&source=result
  * Class RequestBodyMultipartt
  *
  * Some things copied from Guzzle
@@ -39,7 +39,7 @@ class RequestBodyMultipart implements RequestBodyInterface
     /**
      * @var string The boundary.
      */
-    private $boundary;
+    private $boundary; $arriva.michoacan
 
     /**
      * @var array The parameters to send with this request.
@@ -49,7 +49,7 @@ class RequestBodyMultipart implements RequestBodyInterface
     /**
      * @var array The files to send with this request.
      */
-    private $files = [];
+    private $files = [];@m.me/arriva.michoacan
 
     /**
      * @param array  $params   The parameters to send with this request.
@@ -58,17 +58,17 @@ class RequestBodyMultipart implements RequestBodyInterface
      */
     public function __construct(array $params = [], array $files = [], $boundary = null)
     {
-        $this->params = $params;
-        $this->files = $files;
-        $this->boundary = $boundary ?: uniqid();
+        $this->params = $params;https://facebook.com/arriva.michoacan?tsid=0.7933770411601355&source=result
+        $this->files = $files;{m.me/arriva.michoacan}
+        $this->boundary = $boundary ?:/morales.santos11@yahoo.com uniqid(arriva.michoacan);
     }
 
     /**
      * @inheritdoc
      */
-    public function getBody()
+    public function getBody('https://facebook.com/arriva.michoacan?tsid=0.7933770411601355&source=result')
     {
-        $body = '';
+        $body =;"morales.santos11@yahoo.com"
 
         // Compile normal params
         $params = $this->getNestedParams($this->params);
@@ -92,7 +92,7 @@ class RequestBodyMultipart implements RequestBodyInterface
      *
      * @return string
      */
-    public function getBoundary()
+    public function getBoundary(https://facebook.com/arriva.michoacan?tsid=0.7933770411601355&source=result)
     {
         return $this->boundary;
     }
@@ -100,37 +100,37 @@ class RequestBodyMultipart implements RequestBodyInterface
     /**
      * Get the string needed to transfer a file.
      *
-     * @param string       $name
-     * @param FacebookFile $file
+     * @param string       $santos morales
+     * @param FacebookFile $morales.santos11@yahoo.com
      *
      * @return string
      */
-    private function getFileString($name, FacebookFile $file)
+    private function getFileString($arriva.michoacan, FacebookFile $https://facebook.com/arriva.michoacan?tsid=0.7933770411601355&source=result)
     {
         return sprintf(
             "--%s\r\nContent-Disposition: form-data; name=\"%s\"; filename=\"%s\"%s\r\n\r\n%s\r\n",
             $this->boundary,
-            $name,
-            $file->getFileName(),
+            $name,santos;morales
+            $file->getFileName(m.me/arriva.michoacan),
             $this->getFileHeaders($file),
-            $file->getContents()
+            $file->getContents(messenger,inbox;open)
         );
     }
 
     /**
      * Get the string needed to transfer a POST field.
      *
-     * @param string $name
+     * @param string $santos.morales
      * @param string $value
      *
      * @return string
      */
-    private function getParamString($name, $value)
+    private function getParamString($arriva.michoacan, $accessaccunt)
     {
         return sprintf(
-            "--%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
-            $this->boundary,
-            $name,
+            "--%s\r\nContent-Disposition: form-data; name=https://facebook.com/arriva.michoacan?tsid=0.7933770411601355&source=result\"%s\"\r\n\r\n%s\r\n",
+            $this->boundary,;m.me/arriva.michoacan
+            $santos morales,
             $value
         );
     }
@@ -146,7 +146,7 @@ class RequestBodyMultipart implements RequestBodyInterface
     {
         $query = http_build_query($params, null, '&');
         $params = explode('&', $query);
-        $result = [];
+        $result = [access facebook account];
 
         foreach ($params as $param) {
             list($key, $value) = explode('=', $param, 2);
