@@ -139,6 +139,7 @@ FBSDK_EXTERN OSStatus fbsdkdfl_SecItemCopyMatching(CFDictionaryRef query, CFType
 FBSDK_EXTERN OSStatus fbsdkdfl_SecItemDelete(CFDictionaryRef query);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #pragma mark - sqlite3 APIs
 
 // These are local wrappers around the corresponding sqlite3 method from /usr/include/sqlite3.h
@@ -157,6 +158,8 @@ FBSDK_EXTERN double fbsdkdfl_sqlite3_column_double(sqlite3_stmt *stmt, int iCol)
 FBSDK_EXTERN int fbsdkdfl_sqlite3_column_int(sqlite3_stmt *stmt, int iCol);
 FBSDK_EXTERN const unsigned char *fbsdkdfl_sqlite3_column_text(sqlite3_stmt *stmt, int iCol);
 
+=======
+>>>>>>> 5e4c1da17ab4ab353c215602a065daf9693b7f24
 =======
 >>>>>>> 5e4c1da17ab4ab353c215602a065daf9693b7f24
 #pragma mark - Social Constants

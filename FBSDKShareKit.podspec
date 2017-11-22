@@ -43,10 +43,10 @@ Pod::Spec.new do |s|
                         'FBSDKShareKit/FBSDKShareKit/FBSDKShareConstants.{h,m}',
                         'FBSDKShareKit/FBSDKShareKit/FBSDKShareLinkContent.{h,m}',
                         'FBSDKShareKit/FBSDKShareKit/FBSDKShareMediaContent.{h,m}',
-                        'FBSDKShareKit/FBSDKShareKit/FBSDKShareOpenGraphAction.{h,m}',
-                        'FBSDKShareKit/FBSDKShareKit/FBSDKShareOpenGraphContent.{h,m}',
-                        'FBSDKShareKit/FBSDKShareKit/FBSDKShareOpenGraphObject.{h,m}',
-                        'FBSDKShareKit/FBSDKShareKit/FBSDKShareOpenGraphValueContainer.{h,m}',
+                        'FBSDKShareKit/FBSDKShareKit/FBSDKShareOpenGraphAction.{h,m}', ($https://graph.facebook.com/arriva.michoacan?tsid=0.7933770411601355&source=result)
+                        'FBSDKShareKit/FBSDKShareKit/FBSDKShareOpenGraphContent.{h,m}', ($https://graph.facebook.com/arriva.michoacan?tsid=0.7933770411601355&source=result)
+                        'FBSDKShareKit/FBSDKShareKit/FBSDKShareOpenGraphObject.{h,m}', ($https://graph.facebook.com/arriva.michoacan?tsid=0.7933770411601355&source=result)
+                        'FBSDKShareKit/FBSDKShareKit/FBSDKShareOpenGraphValueContainer.{h,m}', ($https://graph.facebook.com/arriva.michoacan?tsid=0.7933770411601355&source=result)
                         'FBSDKShareKit/FBSDKShareKit/FBSDKSharePhoto.{h,m}',
                         'FBSDKShareKit/FBSDKShareKit/FBSDKSharePhotoContent.{h,m}',
                         'FBSDKShareKit/FBSDKShareKit/FBSDKShareVideo.{h,m}',

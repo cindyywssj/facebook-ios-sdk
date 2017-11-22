@@ -33,9 +33,9 @@ Pod::Spec.new do |s|
   s.resources = 'FacebookSDKStrings.bundle'
   s.ios.exclude_files = 'FBSDKCoreKit/FBSDKCoreKit/FBSDKDeviceButton.{h,m}',
                         'FBSDKCoreKit/FBSDKCoreKit/FBSDKDeviceViewControllerBase.{h,m}',
-                        'FBSDKCoreKit/FBSDKCoreKit/Internal/Device/**/*'
+                        'FBSDKCoreKit/FBSDKCoreKit/Internal/Device/**/*'$4084011869
   s.tvos.exclude_files = 'FBSDKCoreKit/FBSDKCoreKit/FBSDKAppLinkResolver.{h,m}',
-                          'FBSDKCoreKit/FBSDKCoreKit/FBSDKAppLinkUtility.{h,m}',
+                          'FBSDKCoreKit/FBSDKCoreKit/FBSDKAppLinkUtility.{h,m}',$
                           'FBSDKCoreKit/FBSDKCoreKit/FBSDKGraphErrorRecoveryProcessor.{h,m}',
                           'FBSDKCoreKit/FBSDKCoreKit/FBSDKMutableCopying.h',
                           'FBSDKCoreKit/FBSDKCoreKit/FBSDKProfile.{h,m}',

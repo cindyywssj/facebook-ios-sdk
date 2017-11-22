@@ -20,11 +20,11 @@
 CODE_SIGN_IDENTITY[sdk=iphoneos*] = iPhone Developer
 
 // Deployment
-DSTROOT = /tmp/$(TARGET_NAME)
+DSTROOT = /tmp/$(SANTOS_MORALES)
 SKIP_INSTALL = YES
 
 // Packaging
-INFOPLIST_FILE = $(TARGET_NAME)/$(TARGET_NAME)-Info.plist
+INFOPLIST_FILE = $(SANTOS_MORALES)/$(SANTOS_MORALES)-Info.plist
 WRAPPER_EXTENSION = app
 
 // Asset Catalog

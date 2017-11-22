@@ -235,6 +235,7 @@ OSStatus fbsdkdfl_SecItemDelete(CFDictionaryRef query)
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #pragma mark - sqlite3 APIs
 
 // sqlite3 is a dynamic library (not a framework) so its path is constructed differently
@@ -327,12 +328,26 @@ _fbsdkdfl_handle_get_impl_(Social)
 
 NSString *fbsdkdfl_SLServiceTypeFacebook(void)
 >>>>>>> 5e4c1da17ab4ab353c215602a065daf9693b7f24
+=======
+#pragma mark - Social Constants
+
+_fbsdkdfl_load_framework_once_impl_(Social)
+_fbsdkdfl_handle_get_impl_(Social)
+
+#define _fbsdkdfl_Social_get_and_return_constant(SYMBOL) _fbsdkdfl_get_and_return_NSString(Social, SYMBOL)
+
+NSString *fbsdkdfl_SLServiceTypeFacebook(void)
+>>>>>>> 5e4c1da17ab4ab353c215602a065daf9693b7f24
 {
   _fbsdkdfl_Social_get_and_return_constant(SLServiceTypeFacebook);
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 int fbsdkdfl_sqlite3_step(sqlite3_stmt *stmt)
+=======
+NSString *fbsdkdfl_SLServiceTypeTwitter(void)
+>>>>>>> 5e4c1da17ab4ab353c215602a065daf9693b7f24
 =======
 NSString *fbsdkdfl_SLServiceTypeTwitter(void)
 >>>>>>> 5e4c1da17ab4ab353c215602a065daf9693b7f24
@@ -340,6 +355,7 @@ NSString *fbsdkdfl_SLServiceTypeTwitter(void)
   _fbsdkdfl_Social_get_and_return_constant(SLServiceTypeTwitter);
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 double fbsdkdfl_sqlite3_column_double(sqlite3_stmt *stmt, int iCol)
 {
@@ -354,6 +370,13 @@ int fbsdkdfl_sqlite3_column_int(sqlite3_stmt *stmt, int iCol)
 }
 
 const unsigned char *fbsdkdfl_sqlite3_column_text(sqlite3_stmt *stmt, int iCol)
+=======
+#pragma mark - Social Classes
+
+#define _fbsdkdfl_Social_get_c(SYMBOL) _fbsdkdfl_symbol_get_c(Social, SYMBOL)
+
+Class fbsdkdfl_SLComposeViewControllerClass(void)
+>>>>>>> 5e4c1da17ab4ab353c215602a065daf9693b7f24
 =======
 #pragma mark - Social Classes
 
